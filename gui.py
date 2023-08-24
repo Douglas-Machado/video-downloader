@@ -3,15 +3,16 @@ import PySimpleGUI as sg
 from downloader import Downloader
 
 layout = [
-    [sg.Text("Welcome to the Video Downloader!", key='container')],
+    [sg.Text("Welcome to the Video Downloader!", key="container")],
     [sg.Text("Paste the link down below")],
     sg.Input(key="input"),
-    sg.Button("Ok", size=(12, 2), mouseover_colors=('blue',)),
+    sg.Button("Ok", size=(12, 2), mouseover_colors=("blue",)),
 ]
 
 WD = os.getcwd()
 
-def create_layout(texts, options, inputs=None, size=(640,480), file_browse=None):
+
+def create_layout(texts, options, inputs=None, size=(640, 480), file_browse=None):
     sg.theme("DarkBlue4")
     layout = [texts, inputs, options]
     if not inputs:
@@ -23,14 +24,14 @@ def create_layout(texts, options, inputs=None, size=(640,480), file_browse=None)
             title="Video Downloader",
             layout=layout,
             finalize=True,
-            font=('Bahnschrift SemiBold Condensed',),
+            font=("Bahnschrift SemiBold Condensed",),
             size=size,
         )
     return sg.Window(
         title="Video Downloader",
         layout=layout,
         finalize=True,
-        font=('Bahnschrift SemiBold Condensed',),
+        font=("Bahnschrift SemiBold Condensed",),
         size=size,
     )
 
@@ -43,13 +44,13 @@ while True:
     event, values = window.read()
     if event == sg.WINDOW_CLOSED:
         break
-    if event == 'Ok' and not values['input']:
+    if event == "Ok" and not values["input"]:
         continue
-    
+
     try:
         downloader = Downloader(values["input"])
     except Exception as ex:
-        window.extend_layout(window, [[sg.Text("Invalid link", text_color='red')]])
+        window.extend_layout(window, [[sg.Text("Invalid link", text_color="red")]])
         continue
 
     window.close()
@@ -66,46 +67,48 @@ while True:
     options = None
     if downloader.get_progressive() == True:
         options = [
-            [sg.Button(
-                f"type: {extension.type} extension: {extension.mime_type} resolution: {extension.resolution}",
-            )]
-            for extension in formats
-        ]
-    else:
-        options = [
             [
                 sg.Button(
                     f"type: {extension.type} extension: {extension.mime_type} resolution: {extension.resolution}",
-                    border_width=5
+                    border_width=5,
                 )
-            ] if extension.type == 'video' else [
-                sg.Button(
-                    f"type: {extension.type} extension: {extension.mime_type}",
-                border_width=5)
             ]
             for extension in formats
         ]
+    else:
+        options = sg.Listbox(
+            [
+                f"type: {extension.type} extension: {extension.mime_type} resolution: {extension.resolution}"
+                if extension.type == "video"
+                else f"type: {extension.type} extension: {extension.mime_type}"
+                for extension in formats
+            ],
+            size=(40, 15),
+        )
 
     window = create_layout(
         texts=[sg.Text("Available formats")],
-        options=options,
-        size=(720, len(options)*45)
+        inputs=[options],
+        options=[sg.Button("Ok", size=(12, 2), mouseover_colors=("blue",))],
     )
     event, values = window.read()
-    dados = event.split()
+    dados = values[0][0].split()
     downloader.set_type(dados[1])
-    downloader.set_mime_type(dados[3].split('/')[1])
-    if downloader.get_type() == 'video':
+    downloader.set_mime_type(dados[3].split("/")[1])
+    if downloader.get_type() == "video":
         downloader.set_resolution(dados[5])
 
     window.close()
     window = create_layout(
-        texts=[[sg.Text("Choose a folder: ")]], inputs=[sg.Input(key='IN2', enable_events=True)],
-        options=[sg.FolderBrowse(initial_folder=WD), sg.Button("Submit")]
+        texts=[[sg.Text("Choose a folder: ")]],
+        inputs=[sg.Input(key="IN2", enable_events=True)],
+        options=[sg.FolderBrowse(initial_folder=WD), sg.Button("Submit")],
     )
     event, values = window.read()
-    downloader.set_path(values['Browse'])
-    downloader.download()
+    downloader.set_path(values["Browse"])
+    path = downloader.download()
+    window.extend_layout(window, [[sg.Text(f"path: {path}", text_color="cyan")]])
+    print("hello")
     break
 
 window.close()

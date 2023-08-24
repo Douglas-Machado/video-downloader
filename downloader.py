@@ -24,8 +24,7 @@ class Downloader:
             .first()
         )
 
-        path = video.download(self.get_path())
-        print(f"Video downloaded in: {path}")
+        return video.download(self.get_path())
 
     def get_path(self):
         return self.__path

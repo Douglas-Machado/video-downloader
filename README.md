@@ -3,11 +3,11 @@
 ## This project uses pytube lib
 
 ~~~bash
-pip install pytube
+pip install requirements.txt
 ~~~~
 
 ### Running the project
 
 ~~~bash
-python main.py
+python gui.py
 ~~~~
